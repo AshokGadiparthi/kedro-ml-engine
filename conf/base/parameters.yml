@@ -1,0 +1,427 @@
+# ════════════════════════════════════════════════════════════════════════════
+# COMPLETE PARAMETERS - PHASES 1-6 (100% INTEGRATED)
+# ════════════════════════════════════════════════════════════════════════════
+# ✅ All existing parameters preserved (100%)
+# ✅ Phase 5 parameters added
+# ════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DATA PATHS (Required by Phase 1)
+# ─────────────────────────────────────────────────────────────────────────────
+
+data_loading:
+  mode: "single"
+  filepath: data/01_raw/data.csv
+  #filepath: ${env:RAW_DATA_FILEPATH}  # ✅ PLACEHOLDER
+  target_column: "income"  # Change to your target column name
+  test_size: 0.2
+  random_state: 42
+  stratify: true
+
+#data_path: ${data_loading.filepath}
+data_path: data/01_raw/data.csv
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TARGET & FEATURES (Required by all phases)
+# ─────────────────────────────────────────────────────────────────────────────
+
+#target_column: "Churn"                  # Column to predict (ADJUST TO YOUR DATASET)
+target_column: "income"
+exclude_columns: []                    # Columns to exclude from features
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DATA PROCESSING (Required by Phase 1 & 2)
+# ─────────────────────────────────────────────────────────────────────────────
+
+data_processing:
+  handle_missing: "mean"              # Options: "mean", "median", "forward_fill", "drop"
+  test_size: 0.2
+  random_state: 42
+  stratify: null                       # Set to target_column for stratified split
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VALIDATION (Phase 1)
+# ─────────────────────────────────────────────────────────────────────────────
+
+validation:
+  check_missing: true
+  check_duplicates: true
+  check_data_types: true
+  check_column_names: true
+  missing_threshold: 0.5              # Alert if column has >50% missing
+
+# ════════════════════════════════════════════════════════════════════════════
+# FEATURE ENGINEERING (Phase 2) - WITH PERMANENT EXPLOSION FIXES
+# ════════════════════════════════════════════════════════════════════════════
+
+feature_engineering:
+
+  # ===== FIX #1: ID COLUMN AUTO-DETECTION =====
+  drop_id_columns: true
+  id_cardinality_threshold: 0.95
+  id_keywords:
+    - 'id'
+    - 'uid'
+    - 'customer'
+    - 'user'
+    - 'account'
+    - 'reference'
+
+  # ===== FIX #3: CONTROLLED POLYNOMIAL FEATURES =====
+  polynomial_degree: 2
+  include_bias: false
+  polynomial_features: false
+  max_polynomial_features: 50
+  max_output_features: 100
+
+  # ===== FIX #4: VARIANCE-BASED FILTERING =====
+  variance_threshold: 0.01
+  apply_variance_filter: true
+
+  # ===== FIX #5: EXPLOSION SAFETY VALIDATION =====
+  max_features_allowed: 500
+  validate_feature_count: true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CATEGORICAL HANDLING (Phase 2)
+# ─────────────────────────────────────────────────────────────────────────────
+
+categorical:
+  encoding_method: "smart"
+  max_categories_to_onehot: 10
+  max_categories_to_label: 50
+  max_features_from_encoding: 100
+  handle_unknown: "ignore"
+  min_frequency: 1
+  drop_first_category: true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SCALING & NORMALIZATION (Phase 2)
+# ─────────────────────────────────────────────────────────────────────────────
+
+scaling:
+  method: "standard"
+  scale_numeric_only: true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FEATURE SELECTION (Phase 2)
+# ─────────────────────────────────────────────────────────────────────────────
+
+feature_selection:
+  method: "importance"
+  n_features: 10
+  test_size: 0.2
+  correlation_threshold: 0.95
+  importance_method: 'tree'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROBLEM TYPE DETECTION (Phase 2 & 3)
+# ─────────────────────────────────────────────────────────────────────────────
+
+problem_type:
+  auto_detect: true
+  override: null
+
+# ════════════════════════════════════════════════════════════════════════════
+# PHASE 3: MODEL TRAINING & EVALUATION
+# ════════════════════════════════════════════════════════════════════════════
+
+model_training:
+  cv_folds: 5
+  random_state: 42
+  n_jobs: -1
+
+  baseline:
+    use_baseline: true
+
+  hyperparameter_tuning:
+    cv_folds: 5
+    scoring: null
+    n_iter_search: 10
+
+  evaluation:
+    compute_feature_importance: true
+    log_classification_report: true
+    check_overfitting: true
+
+  classification:
+    n_estimators: [50, 100]
+    max_depth: [5, 10, 15]
+    min_samples_split: [2, 5]
+
+  regression:
+    n_estimators: [50, 100]
+    learning_rate: [0.01, 0.1]
+    max_depth: [3, 5, 7]
+
+# ════════════════════════════════════════════════════════════════════════════
+# PHASE 4: COMPLETE ML ALGORITHMS (50+)
+# ════════════════════════════════════════════════════════════════════════════
+
+algorithms:
+  max_algorithms: null
+
+  use_regression_algorithms: true
+  use_classification_algorithms: true
+
+  regression:
+    linear_models: true
+    tree_based: true
+    svm: true
+    specialized: true
+    xgboost: true
+    lightgbm: true
+    catboost: true
+
+  classification:
+    linear_models: true
+    tree_based: true
+    svm: true
+    naive_bayes: true
+    neighbors: true
+    ensemble: true
+    xgboost: true
+    lightgbm: true
+    catboost: true
+
+  n_best_models: 5
+  save_all_models: true
+  save_comparison: true
+  generate_summary: true
+
+# ════════════════════════════════════════════════════════════════════════════
+# 🆕 PHASE 5: ADVANCED ANALYSIS & REPORTING (OPTIONAL PIPELINE)
+# ════════════════════════════════════════════════════════════════════════════
+
+phase5:
+  # ────────────────────────────────────────────────────────────────────────
+  # MASTER SWITCH: Enable/Disable entire Phase 5
+  # ────────────────────────────────────────────────────────────────────────
+  enabled: true  # Set to false to skip Phase 5 entirely
+
+  # Output directory for Phase 5 reports and artifacts
+  output_dir: 'data/08_reporting'
+
+  # ────────────────────────────────────────────────────────────────────────
+  # MODULE SWITCHES: Enable/Disable individual Phase 5 modules
+  # ────────────────────────────────────────────────────────────────────────
+  modules:
+    # Module 5a: Training Strategies (HEAVY - requires full training data)
+    training_strategies: false      # Disable by default (requires re-training)
+
+    # Module 5b: Comprehensive Metrics (LIGHT - recommended)
+    metrics: true                   # Calculate 40+ metrics
+
+    # Module 5c: Cross-Validation (HEAVY - requires full training data)
+    cross_validation: false         # Disable by default (heavy computation)
+
+    # Module 5d: Model Comparison (LIGHT - optional)
+    model_comparison: false         # Compare models, statistical tests
+
+    # Module 5e: Visualizations (LIGHT - recommended)
+    visualization: true             # Generate plots and charts
+
+    # Module 5f: Hyperparameter Analysis (LIGHT - optional)
+    hyperparameter_analysis: false  # Sensitivity analysis
+
+    # Module 5g: Report Generation (LIGHT - recommended)
+    reports: true                   # Generate HTML/JSON/PDF reports
+
+  # ────────────────────────────────────────────────────────────────────────
+  # MODULE-SPECIFIC PARAMETERS
+  # ────────────────────────────────────────────────────────────────────────
+
+  # Module 5a: Training Strategies
+  training_strategies:
+    strategies:
+      - stratified_k_fold          # StratifiedTrainer with k-fold CV
+      - time_series                # TimeSeriesTrainer for temporal data
+      - progressive                # ProgressiveTrainer with early stopping
+    k_fold_splits: 5               # Number of k-fold splits
+    validation_split: 0.2          # Validation split ratio
+    early_stopping_patience: 10    # Number of epochs without improvement
+    random_state: 42               # Random seed for reproducibility
+
+  # Module 5b: Metrics Calculation
+  metrics:
+    # Classification metrics (for binary/multiclass problems)
+    classification:
+      enabled: true
+      metrics:
+        - accuracy
+        - precision
+        - recall
+        - f1_score
+        - balanced_accuracy
+        - roc_auc
+        - confusion_matrix
+
+    # Regression metrics (if applicable)
+    regression:
+      enabled: false
+      metrics:
+        - mse
+        - rmse
+        - mae
+        - r2_score
+
+    # Statistical metrics
+    statistical:
+      enabled: true
+      metrics:
+        - cohen_kappa
+        - matthews_correlation
+        - specificity
+        - sensitivity
+
+  # Module 5c: Cross-Validation
+  cross_validation:
+    strategies:
+      - stratified_k_fold          # For imbalanced classification
+      - time_series                # For temporal data
+      - group_k_fold               # For grouped data
+      - leave_one_out              # LOO-CV
+      - shuffle_split              # Random shuffle splits
+    n_splits: 5                    # Number of splits
+    test_size: 0.2                 # Test set size (if applicable)
+    random_state: 42
+
+  # Module 5d: Model Comparison
+  model_comparison:
+    metrics_to_compare:
+      - accuracy
+      - precision
+      - recall
+      - f1_score
+      - roc_auc
+    statistical_tests:
+      - paired_ttest               # Paired t-test
+      - mcnemar                    # McNemar's test
+      - friedman                   # Friedman test (multiple models)
+    significance_level: 0.05       # Alpha level for statistical tests
+    create_ranking: true           # Create model ranking table
+
+  # Module 5e: Visualization
+  visualization:
+    figsize: [12, 8]               # Figure size (width, height)
+    dpi: 100                       # Resolution (dots per inch)
+    style: 'seaborn'               # Matplotlib style
+    plot_types:
+      - confusion_matrix           # Confusion matrix heatmap
+      - roc_curve                  # ROC curve (binary classification)
+      - precision_recall_curve     # PR curve
+      - learning_curves            # Learning curves (if available)
+      - feature_importance         # Feature importance (if available)
+      - residual_plot              # Residual plot (if available)
+      - calibration_plot           # Calibration plot
+      - classification_report      # Classification report heatmap
+    save_format: 'png'             # Format: png, jpg, pdf
+    save_individual: true          # Save each plot individually
+    save_combined: false           # Save all plots combined
+
+  # Module 5f: Hyperparameter Analysis
+  hyperparameter_analysis:
+    analyze_sensitivity: true      # Parameter sensitivity analysis
+    analyze_generalization_gap: true  # Analyze overfitting
+    rank_by_importance: true       # Rank parameters by importance
+    parameters_to_analyze:
+      - 'C'                        # SVM regularization
+      - 'max_depth'                # Tree depth
+      - 'n_estimators'             # Number of trees
+      - 'learning_rate'            # Learning rate
+      - 'alpha'                    # L1/L2 regularization
+
+  # Module 5g: Report Generation
+  reports:
+    # Report formats to generate
+    formats:
+      - html                       # HTML report (interactive)
+      - json                       # JSON report (machine-readable)
+      - pdf                        # PDF report (print-friendly)
+
+    # Report components
+    include_sections:
+      - executive_summary          # High-level summary
+      - metrics_table              # Detailed metrics table
+      - visualizations             # Plots and charts
+      - model_info                 # Model details
+      - hyperparameters            # Model hyperparameters
+      - feature_analysis           # Feature importance
+      - recommendations            # Improvement suggestions
+
+    # Model card generation
+    include_model_card: true       # Generate model card
+    model_card_format: 'markdown'  # markdown or json
+
+    # Report styling
+    html_theme: 'light'            # light or dark
+    include_toc: true              # Table of contents
+    include_footer: true           # Footer with metadata
+
+# ════════════════════════════════════════════════════════════════════════════
+# PHASE 6: ENSEMBLE METHODS
+# ════════════════════════════════════════════════════════════════════════════
+
+phase6:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Ensemble Method Selection
+  # ─────────────────────────────────────────────────────────────────────────
+
+  ensemble_methods:
+    enable_stacking: true           # Multi-level stacking (accurate, slower)
+    enable_blending: true           # Fast blending (5-10x faster)
+    enable_voting: true             # Weighted voting (fastest)
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Stacking Configuration
+  # ─────────────────────────────────────────────────────────────────────────
+
+  stacking:
+    cv_folds: 5                     # Cross-validation folds for meta-features
+    meta_model: "logistic_regression"  # "logistic_regression", "ridge", "random_forest"
+    use_probabilities: true         # Use probability predictions vs hard predictions
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Blending Configuration
+  # ─────────────────────────────────────────────────────────────────────────
+
+  blending:
+    holdout_fraction: 0.2           # Fraction of data for holdout validation
+    meta_model: "logistic_regression"
+    optimize_weights: true          # Optimize blend weights
+    weight_optimization_method: "sharpe"  # "sharpe", "robust", "diversity"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Voting Configuration
+  # ─────────────────────────────────────────────────────────────────────────
+
+  voting:
+    weighting_strategy: "accuracy"  # "equal", "accuracy", "sharpe"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Analysis & Reporting
+  # ─────────────────────────────────────────────────────────────────────────
+
+  analysis:
+    calculate_diversity: true       # Calculate ensemble diversity metrics
+    generate_plots: true            # Generate ensemble comparison plots
+    output_path: "data/06_models"   # Output directory for ensemble models
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # General Settings
+  # ─────────────────────────────────────────────────────────────────────────
+
+  random_state: 42                  # For reproducibility
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LOGGING (All phases)
+# ─────────────────────────────────────────────────────────────────────────────
+
+logging:
+  verbose: true
+  log_feature_importance: true
+  log_problem_type: true
+  log_preprocessing: true
+  log_model_comparison: true
+  log_algorithm_performance: true
+  log_level: "INFO"
